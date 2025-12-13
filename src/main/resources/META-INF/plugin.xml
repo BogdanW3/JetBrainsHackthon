@@ -31,7 +31,6 @@
               instance="rs.sljivicbusiness.jetbrainshackathon.settings.OpenAISettingsConfigurable"
               id="rs.sljivicbusiness.jetbrainshackathon.settings.OpenAISettingsConfigurable"
               displayName="OpenAI API Settings"/>
-    <multiHostInjector implementation="rs.sljivicbusiness.jetbrainshackathon.inject.RegexStringInjector"/>
   </extensions>
   <actions>
     <action id="ExplainRegex"
