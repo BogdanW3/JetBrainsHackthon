@@ -70,8 +70,18 @@ object RegexTokenizer {
                         i1++
                     }
 
+                    'D' -> {
+                        tokens.add(RegexToken.NotDigitClass)
+                        i1++
+                    }
+
                     'w' -> {
                         tokens.add(RegexToken.WordClass)
+                        i1++
+                    }
+
+                    'W' -> {
+                        tokens.add(RegexToken.NotWordClass)
                         i1++
                     }
 
@@ -79,13 +89,16 @@ object RegexTokenizer {
                         tokens.add(RegexToken.WhitespaceClass)
                         i1++
                     }
+
+                    'S' -> {
+                        tokens.add(RegexToken.NotWhitespaceClass)
+                        i1++
+                    }
                     // Escaped special characters
                     '.', '*', '+', '?', '[', ']', '(', ')', '{', '}', '^', '$', '|', '\\' -> {
                         tokens.add(RegexToken.Literal(regex[i1 + 1].toString()))
                         i1++
                     }
-
-
 
                     else -> {
                         // Other escape sequences treated as literals
@@ -99,7 +112,13 @@ object RegexTokenizer {
             regex[i1] == '[' -> {
                 val end = regex.indexOf(']', i1)
                 if (end > i1) {
-                    tokens.add(RegexToken.CharClass(regex.substring(i1, end + 1)))
+                    val charClassContent = regex.substring(i1, end + 1)
+                    // Check if it's a negated character class [^...]
+                    if (charClassContent.startsWith("[^")) {
+                        tokens.add(RegexToken.NegatedCharClass(charClassContent))
+                    } else {
+                        tokens.add(RegexToken.CharClass(charClassContent))
+                    }
                     i1 = end
                 }
             }
@@ -117,15 +136,21 @@ object RegexTokenizer {
 
             // Quantifiers (must come after a token)
             regex[i1] == '*' && tokens.isNotEmpty() -> {
-                tokens.add(RegexToken.Quantifier(0, null))
+                val lazy = i1 + 1 < regex.length && regex[i1 + 1] == '?'
+                tokens.add(RegexToken.Quantifier(0, null, lazy))
+                if (lazy) i1++
             }
 
             regex[i1] == '+' && tokens.isNotEmpty() -> {
-                tokens.add(RegexToken.Quantifier(1, null))
+                val lazy = i1 + 1 < regex.length && regex[i1 + 1] == '?'
+                tokens.add(RegexToken.Quantifier(1, null, lazy))
+                if (lazy) i1++
             }
 
             regex[i1] == '?' && tokens.isNotEmpty() -> {
-                tokens.add(RegexToken.Quantifier(0, 1))
+                val lazy = i1 + 1 < regex.length && regex[i1 + 1] == '?'
+                tokens.add(RegexToken.Quantifier(0, 1, lazy))
+                if (lazy) i1++
             }
 
             regex[i1] == '{' -> {
@@ -173,18 +198,23 @@ object RegexTokenizer {
         if (closeIndex == -1) return null
 
         val content = regex.substring(startIndex + 1, closeIndex)
+        var endIndex = closeIndex
+        val lazy = if (closeIndex + 1 < regex.length && regex[closeIndex + 1] == '?') {
+            endIndex++
+            true
+        } else false
 
         return try {
             when {
                 content.contains(',') -> {
                     val parts = content.split(',')
                     val min = parts[0].trim().toIntOrNull() ?: return null
-                    val max = parts[1].trim().toIntOrNull()
-                    Pair(RegexToken.Quantifier(min, max), closeIndex)
+                    val max = parts[1].trim().takeIf { it.isNotEmpty() }?.toIntOrNull()
+                    Pair(RegexToken.Quantifier(min, max, lazy), endIndex)
                 }
                 else -> {
                     val exact = content.trim().toIntOrNull() ?: return null
-                    Pair(RegexToken.Quantifier(exact, exact), closeIndex)
+                    Pair(RegexToken.Quantifier(exact, exact, lazy), endIndex)
                 }
             }
         } catch (e: Exception) {

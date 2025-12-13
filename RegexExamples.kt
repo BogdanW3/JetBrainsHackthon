@@ -17,6 +17,9 @@ fun regexExamples() {
     // Word characters
     val username = "\\w+"  // One or more word characters
     val variable = "\\w{3,20}"  // Variable name 3-20 chars
+    val notWordVar = "\\W$"
+    val notWordVar = "\\S$"
+    val notWordVar = "\\D$"
 
     // Whitespace
     val spaces = "\\s+"  // One or more spaces
@@ -26,7 +29,7 @@ fun regexExamples() {
 
     // Zero or more (*)
     val optionalSpaces = "a\\s*b"  // 'a' followed by zero or more spaces then 'b'
-    val anyDigits = "\\d*"  // Zero or more digits
+    val anyDigits = "\\d*?"  // Zero or more digits
 
     // One or more (+)
     val atLeastOneDigit = "\\d+"  // At least one digit
@@ -69,9 +72,30 @@ fun regexExamples() {
 
     // Custom character class
     val vowels = "[aeiou]"  // Any vowel
-    val hexDigit = "[0-9a-fA-F]"  // Hex digit
-    val notDigit = "[^0-9]"  // Anything but a digit
+    val hexDigit = "[0-9a-fA-F]$"  // Hex digit
     val range = "[A-Z]"  // Uppercase letter
+
+    // ========== NEGATED CHARACTER CLASSES ==========
+
+    // Basic negation
+    val notDigit = "[^0-9]$"  // Anything but a digit
+    val notVowel = "[^aeiou]"  // Any consonant (or non-letter)
+    val notAEI = "[^aei]"  // Example: matches "r", "g", "n" in "reign"
+
+    // Negated ranges
+    val notLowercase = "[^a-z]$"  // Anything but lowercase letters
+    val notUppercase = "[^A-Z]"  // Anything but uppercase letters
+    val notLetter = "[^a-zA-Z]"  // Anything but letters
+
+    // Complex negations
+    val notAlphanumeric = "[^a-zA-Z0-9]"  // Special characters, spaces, etc.
+    val notWhitespace = "[^\\s]"  // Any non-whitespace character
+    val notWordChar = "[^\\w]"  // Not a word character (punctuation, spaces, etc.)
+
+    // Practical uses
+    val noVowels = "^[^aeiouAEIOU]+$"  // String with no vowels
+    val specialCharsOnly = "[^a-zA-Z0-9\\s]+"  // Find special characters
+    val noSpaces = "[^ ]+"  // Match words (no spaces)
 
     // ========== GROUPS ==========
 

@@ -11,14 +11,26 @@ object RegexExplainer {
             when (token) {
                 is RegexToken.StartAnchor -> "$indent^  Start of the string"
                 is RegexToken.EndAnchor -> "$indent$  End of the string"
-                is RegexToken.DigitClass -> "$indent\\d  A digit (0–9)"
-                is RegexToken.WordClass -> "$indent\\w  A word character (a-z, A-Z, 0-9, _)"
-                is RegexToken.WhitespaceClass -> "$indent\\s  A whitespace character (space, tab, newline)"
-                is RegexToken.CharClass -> when (token.value) {
-                    "." -> "$indent.  Any character (wildcard)"
-                    else -> "$indent${token.value}  Character class"
-                }
+                is RegexToken.DigitClass -> "$indent\\d  Digit (0–9)"
+                is RegexToken.NotDigitClass -> "$indent\\D  Non-digit character"
+                is RegexToken.WordClass -> "$indent\\w  Word character (a-z, A-Z, 0-9, _)"
+                is RegexToken.NotWordClass -> "$indent\\W  Non-word character"
+                is RegexToken.WhitespaceClass -> "$indent\\s  Whitespace character (space, tab, newline)"
+                is RegexToken.NotWhitespaceClass -> "$indent\\S  Non-whitespace character"
+                is RegexToken.CharClass -> "$indent${token.value}  Character class (matches any character in the set)"
+                is RegexToken.NegatedCharClass -> "$indent${token.value}  Negated character class (matches any character NOT in the set)"
                 is RegexToken.Quantifier -> when {
+                    token.lazy && token.min == 0 && token.max == null -> "$indent*?  Zero or more times (as few times as possible)"
+                    token.lazy && token.min == 1 && token.max == null -> "$indent+?  One or more times (as few times as possible)"
+                    token.lazy && token.min == 0 && token.max == 1 -> "$indent??  Zero or one time (as few times as possible)"
+                    token.lazy -> {
+                        val suffix = when {
+                            token.max == null -> "${token.min},"
+                            token.min == token.max -> "${token.min}"
+                            else -> "${token.min},${token.max}"
+                        }
+                        "$indent{${suffix}}?  Lazy quantifier"
+                    }
                     token.min == 0 && token.max == null -> "$indent*  Zero or more times"
                     token.min == 1 && token.max == null -> "$indent+  One or more times"
                     token.min == 0 && token.max == 1 -> "$indent?  Zero or one time (optional)"
