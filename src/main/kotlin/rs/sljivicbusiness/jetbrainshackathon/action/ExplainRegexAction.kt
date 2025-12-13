@@ -4,7 +4,8 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import kotlinx.coroutines.*
+import com.intellij.openapi.application.ApplicationManager
+import kotlinx.coroutines.runBlocking
 import rs.sljivicbusiness.jetbrainshackathon.openai.OpenAIService
 import rs.sljivicbusiness.jetbrainshackathon.regex.*
 import rs.sljivicbusiness.jetbrainshackathon.ui.ExplanationPopup
@@ -57,10 +58,9 @@ class ExplainRegexAction : AnAction() {
         // Show initial explanation immediately
         ExplanationPopup.show(editor, explanation)
 
-        // Call OpenAI API asynchronously to get AI-powered explanation
-        @OptIn(DelicateCoroutinesApi::class)
-        GlobalScope.launch(Dispatchers.IO) {
-            val openAIService = OpenAIService()
+        // Call OpenAI API on a pooled thread to avoid using Dispatchers.Main
+        val openAIService = OpenAIService()
+        ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 val prompt = buildString {
                     appendLine("Explain this regular expression in detail:")
@@ -69,16 +69,19 @@ class ExplainRegexAction : AnAction() {
                     appendLine("Basic breakdown:")
                     explanation.forEach { appendLine(it) }
                     appendLine()
-                    appendLine("Please provide a comprehensive explanation including:")
+                    appendLine("Please provide a short explanation of its intent, including:")
                     appendLine("- What this regex matches")
                     appendLine("- Real-world use cases")
-                    appendLine("- Example matches and non-matches")
+                    appendLine("- Potential problems if any")
+                    appendLine("IMPORTANT: format the answer in plain text, don't make it too exotic or long. Don't use markdown, keep it short and concise, focus on clarity.")
+                    appendLine("Don't echo back the question, just provide the explanation directly.")
+                    appendLine("Keep the response under 150 words, don't needlessly strive for full sentences, keep it maximally short, eg.  ```matches dates in the ISO format\n\nuseful for validating dates in json input\n\ndoesn't check number validity (e.g. 32nd december)```")
                 }
 
-                val aiExplanation = openAIService.askOpenAI(prompt)
+                val aiExplanation = runBlocking { openAIService.askOpenAI(prompt) }
 
-                // Update the popup with AI explanation on EDT
-                withContext(Dispatchers.Main) {
+                // Update the popup on the EDT
+                ApplicationManager.getApplication().invokeLater {
                     val fullExplanation = buildList {
                         add("=== Basic Pattern Breakdown ===")
                         addAll(explanation)

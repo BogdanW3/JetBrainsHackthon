@@ -1,5 +1,6 @@
 package rs.sljivicbusiness.jetbrainshackathon.openai
 
+import com.jetbrains.rd.framework.SocketWire.Companion.timeout
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -16,6 +17,9 @@ import java.io.Closeable
 
 class OpenAIService : Closeable {
     private val client = HttpClient(CIO) {
+        engine {
+            requestTimeout = 0
+        }
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })
         }
