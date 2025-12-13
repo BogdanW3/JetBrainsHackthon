@@ -11,7 +11,7 @@ class RegexHoverProvider : AbstractDocumentationProvider() {
         originalElement: PsiElement?
     ): String? {
         val text = element.text ?: return null
-        if (!looksLikeRegex(text)) return null
+        if (!looksLikeRegex(RegexTokenizer.tryEscapeString(text))) return null
 
         val tokens = RegexTokenizer.tokenize(text)
         val explanation = RegexExplainer.explain(tokens)

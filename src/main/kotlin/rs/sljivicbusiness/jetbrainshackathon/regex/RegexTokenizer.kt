@@ -2,7 +2,7 @@ package rs.sljivicbusiness.jetbrainshackathon.regex
 
 object RegexTokenizer {
 
-    fun checkEscapeString(regex: String): String {
+    fun tryEscapeString(regex: String): String {
         var unescapedRegex = regex
         var escaped = true
 
@@ -50,7 +50,7 @@ object RegexTokenizer {
 
         var regex = regex
         if (!skipUnescape) {
-            regex = checkEscapeString(regex)
+            regex = tryEscapeString(regex)
         }
         val tokens = mutableListOf<RegexToken>()
         var i = 0
