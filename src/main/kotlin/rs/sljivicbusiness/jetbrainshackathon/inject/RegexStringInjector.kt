@@ -23,7 +23,7 @@ class RegexStringInjector : MultiHostInjector {
         val raw = host.text ?: return
 
         val inner = stripQuotes(raw) ?: return
-        val unescaped = RegexTokenizer.tryUnescapeString(inner)
+        val unescaped = RegexTokenizer.tryUnescapeString(raw)
         if (!looksLikeRegex(unescaped)) return
 
         // inject into the inner range (strip quotes)
