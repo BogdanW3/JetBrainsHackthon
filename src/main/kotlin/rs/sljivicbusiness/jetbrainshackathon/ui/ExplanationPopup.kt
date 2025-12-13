@@ -36,6 +36,8 @@ object ExplanationPopup {
                     popup = null
                 }
             })
+
+            popup?.showInBestPositionFor(editor)
         } else
         {
             // replace content
@@ -76,6 +78,5 @@ object ExplanationPopup {
             }
         }
 
-        popup?.showInBestPositionFor(editor)
     }
 }
