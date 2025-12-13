@@ -2,10 +2,32 @@ package rs.sljivicbusiness.jetbrainshackathon.regex
 
 object RegexTokenizer {
 
-    fun tokenize(regex: String, escaped: Boolean): List<RegexToken> {
-        if (escaped)
-        {
-            var unescapedRegex = regex
+    fun checkEscapeString(regex: String): String {
+        var unescapedRegex = regex
+        var escaped = true
+
+    // check whether the string is already unescaped, e.g. if it's a python or JS raw string
+
+        // Python raw string: r"..." or r'...'
+        if (regex.startsWith("r\"") && regex.endsWith("\"")) {
+            unescapedRegex = unescapedRegex.substring(2, unescapedRegex.length - 1)
+            escaped = false
+        } else if (regex.startsWith("r'") && regex.endsWith("'")) {
+            unescapedRegex = unescapedRegex.substring(2, unescapedRegex.length - 1)
+            escaped = false
+        }
+        // JavaScript raw string: /.../
+        else if (regex.startsWith("/") && regex.endsWith("/")) {
+            unescapedRegex = unescapedRegex.substring(1, unescapedRegex.length - 1)
+            escaped = false
+        } else if ((regex.startsWith("\"") && regex.endsWith("\"")) ||
+            (regex.startsWith("'") && regex.endsWith("'")) ||
+            (regex.startsWith("`") && regex.endsWith("`"))
+        ) {
+            unescapedRegex = unescapedRegex.substring(1, unescapedRegex.length - 1)
+        }
+
+        if (escaped) {
             unescapedRegex = unescapedRegex.replace("\\^", "^")
             unescapedRegex = unescapedRegex.replace("\\$", "$")
             unescapedRegex = unescapedRegex.replace("\\.", ".")
@@ -20,7 +42,15 @@ object RegexTokenizer {
             unescapedRegex = unescapedRegex.replace("\\}", "}")
             unescapedRegex = unescapedRegex.replace("\\|", "|")
             unescapedRegex = unescapedRegex.replace("\\\\", "\\")
-            return tokenize(unescapedRegex, false)
+        }
+        return unescapedRegex
+    }
+
+    fun tokenize(regex: String, skipUnescape: Boolean = false): List<RegexToken> {
+
+        var regex = regex
+        if (!skipUnescape) {
+            regex = checkEscapeString(regex)
         }
         val tokens = mutableListOf<RegexToken>()
         var i = 0
