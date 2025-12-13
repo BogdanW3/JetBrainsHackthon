@@ -22,7 +22,10 @@ object RegexExplainer {
                     token.max == null -> "{${token.min},}  At least ${token.min} time(s)"
                     else -> "{${token.min},${token.max}}  Between ${token.min} and ${token.max} times"
                 }
-                is RegexToken.Group -> "(...)  Group with ${token.tokens.size} token(s)"
+                is RegexToken.Group -> {
+                    val innerExplanation = explain(token.tokens).joinToString("\n    ")
+                    "(\n    $innerExplanation\n)  Group of tokens"
+                }
                 is RegexToken.Literal -> "${token.value}  Literal character"
             }
         }
