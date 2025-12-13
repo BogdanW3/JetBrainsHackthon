@@ -9,8 +9,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-//import rs.sljivicbusiness.jetbrainshackathon.openai.ChatResponse
-//import rs.sljivicbusiness.jetbrainshackathon.openai.*
+import rs.sljivicbusiness.jetbrainshackathon.settings.OpenAISettings
 import java.util.*
 import java.io.Closeable
 
@@ -22,14 +21,27 @@ class OpenAIService : Closeable {
         }
     }
 
-    private val apiKey = System.getenv("OPENAI_API_KEY")
-    private val organizationId = System.getenv("OPENAI_ORG_ID") // optional
+    private fun getApiKey(): String {
+        val settings = OpenAISettings.getInstance()
+        return settings.apiKey.takeIf { it.isNotBlank() }
+            ?: System.getenv("OPENAI_API_KEY")
+            ?: throw IllegalStateException("OpenAI API Key not configured. Please set it in Settings > OpenAI API Settings")
+    }
+
+    private fun getOrganizationId(): String? {
+        val settings = OpenAISettings.getInstance()
+        return settings.organizationId.takeIf { it.isNotBlank() }
+            ?: System.getenv("OPENAI_ORG_ID")
+    }
 
     suspend fun askOpenAI(prompt: String): String {
         val initialPrompt = "You are a helpful assistant that always responds in a friendly way."
         val requestId = UUID.randomUUID().toString()
 
         try {
+            val apiKey = getApiKey()
+            val organizationId = getOrganizationId()
+
             val response: HttpResponse = client.post("https://api.openai.com/v1/chat/completions") {
                 header("Authorization", "Bearer $apiKey")
                 organizationId?.let { header("OpenAI-Organization", it) }

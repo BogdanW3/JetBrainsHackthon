@@ -40,3 +40,9 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### API Keys and Secrets ###
+.env
+.env.local
+*.env
+OpenAIPlugin.xml

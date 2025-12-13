@@ -26,6 +26,11 @@
   <extensions defaultExtensionNs="com.intellij">
       <documentationProvider
               implementation="rs.sljivicbusiness.jetbrainshackathon.hover.RegexHoverProvider"/>
+      <applicationConfigurable
+              parentId="tools"
+              instance="rs.sljivicbusiness.jetbrainshackathon.settings.OpenAISettingsConfigurable"
+              id="rs.sljivicbusiness.jetbrainshackathon.settings.OpenAISettingsConfigurable"
+              displayName="OpenAI API Settings"/>
   </extensions>
   <actions>
     <action id="ExplainRegex"

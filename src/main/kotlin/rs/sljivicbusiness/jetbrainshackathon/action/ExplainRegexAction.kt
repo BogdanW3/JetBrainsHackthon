@@ -4,6 +4,8 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import kotlinx.coroutines.*
+import rs.sljivicbusiness.jetbrainshackathon.openai.OpenAIService
 import rs.sljivicbusiness.jetbrainshackathon.regex.*
 import rs.sljivicbusiness.jetbrainshackathon.ui.ExplanationPopup
 
@@ -52,6 +54,46 @@ class ExplainRegexAction : AnAction() {
         val tokens = RegexTokenizer.tokenize(text, true)
         val explanation = RegexExplainer.explain(tokens)
 
+        // Show initial explanation immediately
         ExplanationPopup.show(editor, explanation)
+
+        // Call OpenAI API asynchronously to get AI-powered explanation
+        @OptIn(DelicateCoroutinesApi::class)
+        GlobalScope.launch(Dispatchers.IO) {
+            val openAIService = OpenAIService()
+            try {
+                val prompt = buildString {
+                    appendLine("Explain this regular expression in detail:")
+                    appendLine("Regex: $text")
+                    appendLine()
+                    appendLine("Basic breakdown:")
+                    explanation.forEach { appendLine(it) }
+                    appendLine()
+                    appendLine("Please provide a comprehensive explanation including:")
+                    appendLine("- What this regex matches")
+                    appendLine("- Real-world use cases")
+                    appendLine("- Example matches and non-matches")
+                }
+
+                val aiExplanation = openAIService.askOpenAI(prompt)
+
+                // Update the popup with AI explanation on EDT
+                withContext(Dispatchers.Main) {
+                    val fullExplanation = buildList {
+                        add("=== Basic Pattern Breakdown ===")
+                        addAll(explanation)
+                        add("")
+                        add("=== AI-Powered Detailed Explanation ===")
+                        add(aiExplanation)
+                    }
+                    ExplanationPopup.show(editor, fullExplanation)
+                }
+            } catch (e: Exception) {
+                // Log error but don't interrupt user experience
+                println("Failed to get OpenAI explanation: ${e.message}")
+            } finally {
+                openAIService.close()
+            }
+        }
     }
 }
