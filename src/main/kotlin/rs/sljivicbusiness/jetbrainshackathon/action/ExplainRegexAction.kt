@@ -55,6 +55,9 @@ class ExplainRegexAction : AnAction() {
 
         val lines = buildList {
             add(text)
+            add("========= AI-Powered Explanation =========")
+            add("Fetching detailed explanation from OpenAI...")
+            add("")
             add("======= Regex Pattern Illustration =======")
             addAll(explanation)
         }
