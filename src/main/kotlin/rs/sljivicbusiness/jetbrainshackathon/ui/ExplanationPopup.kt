@@ -20,12 +20,12 @@ object ExplanationPopup {
 
 
         if (popup == null) {
-            val textArea = JTextArea(lines.joinToString("\n"))
-            textArea.isEditable = false
-            textArea.font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
+            val editorPane = JEditorPane("text/html", lines.joinToString("<br>"))
+            editorPane.isEditable = false
+            editorPane.font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
 
             popup = (JBPopupFactory.getInstance()
-                .createComponentPopupBuilder(JScrollPane(textArea), textArea)
+                .createComponentPopupBuilder(JScrollPane(editorPane), editorPane)
                 .setTitle("Regex Explanation")
                 .setResizable(true)
                 .createPopup())
@@ -42,31 +42,30 @@ object ExplanationPopup {
             val content = (popup as AbstractPopup).content
             if (content is AbstractPopup.MyContentPanel) {
                 val scrollPane = content.components.firstOrNull { it is JScrollPane } as? JScrollPane
-                val textArea = scrollPane?.viewport?.view as? JTextArea
-                textArea?.text = lines.joinToString("\n")
+                val editorPane = scrollPane?.viewport?.view as? JEditorPane
+                editorPane?.text = lines.joinToString("<br>")
 
                 var newSize = content.preferredSize
                 // check that it doesn't go off-screen using the popup's position
                 val screenBounds = editor.component.graphicsConfiguration?.bounds
                 if (screenBounds != null) {
-//                    val popupLocation = popup!!.locationOnScreen
-//                    if (popupLocation.x + newSize.width > screenBounds.x + screenBounds.width) {
-//                        newSize = newSize.apply {
-//                            width = screenBounds.x + screenBounds.width - popupLocation.x - 20
-//                        }
-//                    }
-//                    if (popupLocation.y + newSize.height > screenBounds.y + screenBounds.height) {
-//                        newSize = newSize.apply {
-//                            height = screenBounds.y + screenBounds.height - popupLocation.y - 20
-//                        }
-//                    }
-                    // also try to move it into a better position if needed
                     val popupLocation = popup!!.locationOnScreen
                     val adjustedPoint = Point(popupLocation.x, popupLocation.y)
-                    if (popupLocation.x + newSize.width > screenBounds.x + screenBounds.width) {
+                    if (newSize.width > screenBounds.width) {
+                        newSize = newSize.apply {
+                            width = screenBounds.width - 20
+                        }
+                        adjustedPoint.x = screenBounds.x + 10
+                    } else if (popupLocation.x + newSize.width > screenBounds.x + screenBounds.width) {
                         adjustedPoint.x = screenBounds.x + screenBounds.width - newSize.width - 20
                     }
-                    if (popupLocation.y + newSize.height > screenBounds.y + screenBounds.height) {
+
+                    if (newSize.height > screenBounds.height) {
+                        newSize = newSize.apply {
+                            height = screenBounds.height - 20
+                        }
+                        adjustedPoint.y = screenBounds.y + 10
+                    } else if (popupLocation.y + newSize.height > screenBounds.y + screenBounds.height) {
                         adjustedPoint.y = screenBounds.y + screenBounds.height - newSize.height - 20
                     }
                     popup!!.setLocation(adjustedPoint)
