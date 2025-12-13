@@ -20,5 +20,8 @@ class RegexHoverProvider : AbstractDocumentationProvider() {
     }
 
     private fun looksLikeRegex(text: String): Boolean =
-        text.contains("\\d") || text.contains("[") || text.startsWith("^")
+        text.contains("\\d") || text.contains("\\w") || text.contains("\\s") ||
+        text.contains("[") || text.startsWith("^") || text.endsWith("$") ||
+        text.contains("*") || text.contains("+") || text.contains("?") ||
+        text.contains("{") || text.contains("(") || text.contains(".")
 }
