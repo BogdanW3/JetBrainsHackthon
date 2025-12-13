@@ -3,6 +3,7 @@ package rs.sljivicbusiness.jetbrainshackathon.hover
 import rs.sljivicbusiness.jetbrainshackathon.regex.*
 import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.psi.PsiElement
+import rs.sljivicbusiness.jetbrainshackathon.regex.RegexUtils
 
 class RegexHoverProvider : AbstractDocumentationProvider() {
 
@@ -11,7 +12,7 @@ class RegexHoverProvider : AbstractDocumentationProvider() {
         originalElement: PsiElement?
     ): String? {
         val text = element.text ?: return null
-        if (!looksLikeRegex(RegexTokenizer.tryUnescapeString(text))) return null
+        if (!RegexUtils.looksLikeRegex(RegexUtils.tryUnescapeString(text))) return null
 
         val tokens = RegexTokenizer.tokenize(text)
         val explanation = RegexExplainer.explain(tokens)
@@ -19,8 +20,4 @@ class RegexHoverProvider : AbstractDocumentationProvider() {
         return explanation.joinToString("<br>")
     }
 
-    private fun looksLikeRegex(text: String): Boolean =
-        text.contains("\\d") || text.contains("\\w") || text.contains("\\s") ||
-        text.contains(")[") || text.startsWith("^") || text.endsWith("$") ||
-        text.contains("]{") || text.contains(".*")
 }

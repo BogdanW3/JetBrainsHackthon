@@ -6,7 +6,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLanguageInjectionHost
 import org.intellij.lang.regexp.RegExpLanguage
-import rs.sljivicbusiness.jetbrainshackathon.regex.RegexTokenizer
+import rs.sljivicbusiness.jetbrainshackathon.regex.RegexUtils
 
 /**
  * Injects RegExpLanguage into string literals that look like regular expressions.
@@ -23,8 +23,8 @@ class RegexStringInjector : MultiHostInjector {
         val raw = host.text ?: return
 
         val inner = stripQuotes(raw) ?: return
-        val unescaped = RegexTokenizer.tryUnescapeString(raw)
-        if (!looksLikeRegex(unescaped)) return
+        val unescaped = RegexUtils.tryUnescapeString(raw)
+        if (!RegexUtils.looksLikeRegex(unescaped)) return
 
         // inject into the inner range (strip quotes)
         val range = TextRange(raw.indexOf(inner), raw.indexOf(inner) + inner.length)
@@ -32,12 +32,6 @@ class RegexStringInjector : MultiHostInjector {
         registrar.addPlace(null, null, host, range)
         registrar.doneInjecting()
     }
-
-    // Heuristic from existing hover provider: simple patterns that often indicate a regex
-    private fun looksLikeRegex(text: String): Boolean =
-        text.contains("\\d") || text.contains("\\w") || text.contains("\\s") ||
-            text.contains(")[") || text.startsWith("^") || text.endsWith("$") ||
-            text.contains("]{") || text.contains(".*")
 
     private fun stripQuotes(text: String): String? {
         if (text.length >= 2 && ((text.startsWith("\"") && text.endsWith("\"")) || (text.startsWith("'") && text.endsWith("'")))) {
