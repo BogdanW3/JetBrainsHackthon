@@ -19,9 +19,37 @@ class ExplainRegexAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val editor = e.getData(CommonDataKeys.EDITOR) ?: return
-        val selection = editor.selectionModel.selectedText ?: return
+        var text = editor.selectionModel.selectedText
 
-        val tokens = RegexTokenizer.tokenize(selection)
+        if (text.isNullOrBlank()) {
+            // If no selection, try to get the string under the caret
+            val caretOffset = editor.caretModel.offset
+            val document = editor.document
+            val lineNumber = document.getLineNumber(caretOffset)
+            val lineStartOffset = document.getLineStartOffset(lineNumber)
+            val lineEndOffset = document.getLineEndOffset(lineNumber)
+            val lineText = document.getText().substring(lineStartOffset, lineEndOffset)
+            val regexPattern = Regex("\"(.*?)\"|'(.*?)'|`(.*?)`")
+            val matchResult = regexPattern.findAll(lineText)
+
+            text = matchResult.mapNotNull {
+                val range = it.range
+                val absoluteStart = lineStartOffset + range.first
+                val absoluteEnd = lineStartOffset + range.last + 1
+                if (caretOffset in absoluteStart..absoluteEnd) {
+                    it.groups[1]?.value ?:
+                    it.groups[2]?.value ?:
+                    it.groups[3]?.value
+                } else {
+                    null
+                }
+            }.firstOrNull()
+            if (text.isNullOrBlank()) {
+                return
+            }
+        }
+
+        val tokens = RegexTokenizer.tokenize(text)
         val explanation = RegexExplainer.explain(tokens)
 
         ExplanationPopup.show(editor, explanation)
