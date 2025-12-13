@@ -39,5 +39,13 @@
             description="Explain selected regular expression">
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
     </action>
+
+    <action id="ExplainDiff"
+            class="rs.sljivicbusiness.jetbrainshackathon.action.ExplainDiffAction"
+            text="Explain Diff"
+            description="Explain git diff between two commits">
+        <add-to-group group-id="Vcs.Log.ContextMenu" anchor="last"/>
+    </action>
+
   </actions>
 </idea-plugin>
