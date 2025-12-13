@@ -26,7 +26,7 @@ object RegexExplainer {
                 }
                 is RegexToken.Group -> {
                     val innerExplanation = explain(token.tokens, depth + 1).joinToString("<br>")
-                    "$indent(<br>$innerExplanation<br>$indent)  Group of tokens"
+                    "$indent( ------------ depth $depth<br>$innerExplanation<br>$indent) ------------- depth $depth"
                 }
                 is RegexToken.Literal -> "$indent${token.value}  Literal character"
             }
