@@ -53,8 +53,13 @@ class ExplainRegexAction : AnAction() {
         val tokens = RegexTokenizer.tokenize(text)
         val explanation = RegexExplainer.explain(tokens, 0, false)
 
+        val lines = buildList {
+            add(text)
+            add("======= Regex Pattern Illustration =======")
+            addAll(explanation)
+        }
         // Show initial explanation immediately
-        ExplanationPopup.show(editor, explanation)
+        ExplanationPopup.show(editor, lines)
 
         // Call OpenAI API on a pooled thread to avoid using Dispatchers.Main
         val openAIService = OpenAIService()
@@ -81,6 +86,7 @@ class ExplainRegexAction : AnAction() {
                 // Update the popup on the EDT
                 ApplicationManager.getApplication().invokeLater {
                     val fullExplanation = buildList {
+                        add(text)
                         add("========= AI-Powered Explanation =========")
                         add(aiExplanation)
                         add("")
