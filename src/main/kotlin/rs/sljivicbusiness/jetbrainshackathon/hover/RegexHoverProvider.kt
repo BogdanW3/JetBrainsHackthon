@@ -13,24 +13,7 @@ class RegexHoverProvider : AbstractDocumentationProvider() {
         val text = element.text ?: return null
         if (!looksLikeRegex(text)) return null
 
-        var cleanedText: String
-        var escaped = true
-        // detect regex string, and strip the /
-        if (text.startsWith("/") && text.endsWith("/")) {
-            val regexBody = text.substring(1, text.length - 1)
-            cleanedText = regexBody
-            escaped = false
-        }
-        else if (text.startsWith("r\"") && text.endsWith("\"")) {
-            val regexBody = text.substring(2, text.length - 1)
-            cleanedText = regexBody
-            escaped = false
-        } else {
-            // Remove surrounding quotes if present
-            cleanedText = text.trim('"', '\'')
-        }
-
-        val tokens = RegexTokenizer.tokenize(cleanedText, escaped)
+        val tokens = RegexTokenizer.tokenize(text)
         val explanation = RegexExplainer.explain(tokens)
 
         return explanation.joinToString("<br>")

@@ -2,10 +2,12 @@ package rs.sljivicbusiness.jetbrainshackathon.regex
 
 object RegexExplainer {
 
-    fun explain(tokens: List<RegexToken>, depth: Int = 0): List<String> =
+    fun explain(tokens: List<RegexToken>, depth: Int = 0, html: Boolean = true): List<String> =
         tokens.map { token ->
             // html indent
-            val indent = "&nbsp;".repeat((depth + if (token is RegexToken.Quantifier) 1 else 0) * 4)
+            val space = if (html) "&nbsp;".repeat(4) else "    "
+            val newline = if (html) "<br>" else "\n"
+            val indent = space.repeat(depth + if (token is RegexToken.Quantifier) 1 else 0)
             when (token) {
                 is RegexToken.StartAnchor -> "$indent^  Start of the string"
                 is RegexToken.EndAnchor -> "$indent$  End of the string"
@@ -25,8 +27,13 @@ object RegexExplainer {
                     else -> "$indent{${token.min},${token.max}}  Between ${token.min} and ${token.max} times"
                 }
                 is RegexToken.Group -> {
-                    val innerExplanation = explain(token.tokens, depth + 1).joinToString("<br>")
-                    "$indent(<br>$innerExplanation<br>$indent)  Group of tokens"
+                    val innerExplanation = explain(token.tokens, depth + 1, html).joinToString(newline)
+                    "$indent( ------------ depth $depth$newline$innerExplanation$newline$indent) ------------ depth $depth"
+                }
+                is RegexToken.Alternative -> {
+                    val innerExplanation = token.args.flatMap { explain(listOf(it), depth + 1, html) }
+                        .joinToString(newline)
+                    "$indent|  OR depth $depth$newline$innerExplanation$newline${indent}| End of OR depth $depth"
                 }
                 is RegexToken.Literal -> "$indent${token.value}  Literal character"
             }

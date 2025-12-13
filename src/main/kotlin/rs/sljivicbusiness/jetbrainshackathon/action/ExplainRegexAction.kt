@@ -31,29 +31,27 @@ class ExplainRegexAction : AnAction() {
             val lineNumber = document.getLineNumber(caretOffset)
             val lineStartOffset = document.getLineStartOffset(lineNumber)
             val lineEndOffset = document.getLineEndOffset(lineNumber)
-            val lineText = document.getText().substring(lineStartOffset, lineEndOffset)
-            val regexPattern = Regex("\"(.*?)\"|'(.*?)'|`(.*?)`")
+            val lineText = document.text.substring(lineStartOffset, lineEndOffset)
+            val regexPattern = Regex("(r?\".*?\")|('.*?')|(`.*?`)|(/.*?/)")
             val matchResult = regexPattern.findAll(lineText)
 
-            text = matchResult.mapNotNull {
+            text = matchResult.firstNotNullOfOrNull {
                 val range = it.range
                 val absoluteStart = lineStartOffset + range.first
                 val absoluteEnd = lineStartOffset + range.last + 1
                 if (caretOffset in absoluteStart..absoluteEnd) {
-                    it.groups[1]?.value ?:
-                    it.groups[2]?.value ?:
-                    it.groups[3]?.value
+                    it.groups[1]?.value ?: it.groups[2]?.value ?: it.groups[3]?.value ?: it.groups[4]?.value
                 } else {
                     null
                 }
-            }.firstOrNull()
+            }
             if (text.isNullOrBlank()) {
                 return
             }
         }
 
-        val tokens = RegexTokenizer.tokenize(text, true)
-        val explanation = RegexExplainer.explain(tokens)
+        val tokens = RegexTokenizer.tokenize(text)
+        val explanation = RegexExplainer.explain(tokens, 0, false)
 
         // Show initial explanation immediately
         ExplanationPopup.show(editor, explanation)
