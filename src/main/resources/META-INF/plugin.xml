@@ -14,7 +14,7 @@
        Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
   <description><![CDATA[
-    Provides inline explanations for regular expressions and an editor action to explain selected regexes.
+    AI-powered code assistant that provides inline explanations for regular expressions and editor actions to explain selected regexes or any code snippet using OpenAI.
   ]]></description>
 
   <!-- Product and plugin compatibility requirements.
@@ -37,6 +37,12 @@
             class="rs.sljivicbusiness.jetbrainshackathon.action.ExplainRegexAction"
             text="Explain Regex"
             description="Explain selected regular expression">
+      <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+    </action>
+    <action id="ExplainCode"
+            class="rs.sljivicbusiness.jetbrainshackathon.action.ExplainCodeAction"
+            text="Explain Code"
+            description="Explain selected code using AI">
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
     </action>
   </actions>
