@@ -49,7 +49,7 @@ class ExplainRegexAction : AnAction() {
             }
         }
 
-        val tokens = RegexTokenizer.tokenize(text)
+        val tokens = RegexTokenizer.tokenize(text, true)
         val explanation = RegexExplainer.explain(tokens)
 
         ExplanationPopup.show(editor, explanation)

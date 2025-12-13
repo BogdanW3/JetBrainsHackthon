@@ -2,7 +2,26 @@ package rs.sljivicbusiness.jetbrainshackathon.regex
 
 object RegexTokenizer {
 
-    fun tokenize(regex: String): List<RegexToken> {
+    fun tokenize(regex: String, escaped: Boolean): List<RegexToken> {
+        if (escaped)
+        {
+            var unescapedRegex = regex
+            unescapedRegex = unescapedRegex.replace("\\^", "^")
+            unescapedRegex = unescapedRegex.replace("\\$", "$")
+            unescapedRegex = unescapedRegex.replace("\\.", ".")
+            unescapedRegex = unescapedRegex.replace("\\*", "*")
+            unescapedRegex = unescapedRegex.replace("\\+", "+")
+            unescapedRegex = unescapedRegex.replace("\\?", "?")
+            unescapedRegex = unescapedRegex.replace("\\[", "[")
+            unescapedRegex = unescapedRegex.replace("\\]", "]")
+            unescapedRegex = unescapedRegex.replace("\\(", "(")
+            unescapedRegex = unescapedRegex.replace("\\)", ")")
+            unescapedRegex = unescapedRegex.replace("\\{", "{")
+            unescapedRegex = unescapedRegex.replace("\\}", "}")
+            unescapedRegex = unescapedRegex.replace("\\|", "|")
+            unescapedRegex = unescapedRegex.replace("\\\\", "\\")
+            return tokenize(unescapedRegex, false)
+        }
         val tokens = mutableListOf<RegexToken>()
         var i = 0
 
@@ -62,25 +81,17 @@ object RegexTokenizer {
 
                 // Quantifiers (must come after a token)
                 regex[i] == '*' && tokens.isNotEmpty() -> {
-                    val lastToken = tokens.removeLast()
-                    tokens.add(RegexToken.Group(listOf(lastToken)))
                     tokens.add(RegexToken.Quantifier(0, null))
                 }
                 regex[i] == '+' && tokens.isNotEmpty() -> {
-                    val lastToken = tokens.removeLast()
-                    tokens.add(RegexToken.Group(listOf(lastToken)))
                     tokens.add(RegexToken.Quantifier(1, null))
                 }
                 regex[i] == '?' && tokens.isNotEmpty() -> {
-                    val lastToken = tokens.removeLast()
-                    tokens.add(RegexToken.Group(listOf(lastToken)))
                     tokens.add(RegexToken.Quantifier(0, 1))
                 }
                 regex[i] == '{' -> {
                     val quantifier = parseQuantifier(regex, i)
                     if (quantifier != null && tokens.isNotEmpty()) {
-                        val lastToken = tokens.removeLast()
-                        tokens.add(RegexToken.Group(listOf(lastToken)))
                         tokens.add(quantifier.first)
                         i = quantifier.second
                     } else {
@@ -110,7 +121,7 @@ object RegexTokenizer {
                 if (depth == 0) {
                     // Found matching closing parenthesis
                     val groupContent = regex.substring(startIndex + 1, i)
-                    val groupTokens = tokenize(groupContent)
+                    val groupTokens = tokenize(groupContent, true)
                     return Pair(RegexToken.Group(groupTokens), i)
                 }
             }
