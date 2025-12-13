@@ -81,11 +81,11 @@ class ExplainRegexAction : AnAction() {
                 // Update the popup on the EDT
                 ApplicationManager.getApplication().invokeLater {
                     val fullExplanation = buildList {
-                        add("=== Basic Pattern Breakdown ===")
-                        addAll(explanation)
-                        add("")
-                        add("=== AI-Powered Detailed Explanation ===")
+                        add("========= AI-Powered Explanation =========")
                         add(aiExplanation)
+                        add("")
+                        add("======= Regex Pattern Illustration =======")
+                        addAll(explanation)
                     }
                     ExplanationPopup.show(editor, fullExplanation)
                 }
