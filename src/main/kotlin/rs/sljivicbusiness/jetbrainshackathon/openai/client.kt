@@ -10,7 +10,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 //import rs.sljivicbusiness.jetbrainshackathon.openai.ChatResponse
-import rs.sljivicbusiness.jetbrainshackathon.openai.model.*
+//import rs.sljivicbusiness.jetbrainshackathon.openai.*
 import java.util.*
 import java.io.Closeable
 
