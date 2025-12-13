@@ -48,7 +48,7 @@ class ExplainRegexAction : AnAction() {
         }
 
         val tokens = RegexTokenizer.tokenize(text)
-        val explanation = RegexExplainer.explain(tokens)
+        val explanation = RegexExplainer.explain(tokens, 0, false)
 
         ExplanationPopup.show(editor, explanation)
     }

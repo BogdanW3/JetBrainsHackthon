@@ -55,89 +55,139 @@ object RegexTokenizer {
         val tokens = mutableListOf<RegexToken>()
         var i = 0
 
+        // First look for alternation across the whole string, then tokenize substrings
+
+        val alternationParts = mutableListOf<String>()
+        var lastSplit = 0
+        var depth = 0
         while (i < regex.length) {
-            when {
-                // Anchors
-                regex[i] == '^' -> tokens.add(RegexToken.StartAnchor)
-                regex[i] == '$' -> tokens.add(RegexToken.EndAnchor)
-
-                // Escape sequences
-                regex[i] == '\\' && i + 1 < regex.length -> {
-                    when (regex[i + 1]) {
-                        'd' -> {
-                            tokens.add(RegexToken.DigitClass)
-                            i++
-                        }
-                        'w' -> {
-                            tokens.add(RegexToken.WordClass)
-                            i++
-                        }
-                        's' -> {
-                            tokens.add(RegexToken.WhitespaceClass)
-                            i++
-                        }
-                        // Escaped special characters
-                        '.', '*', '+', '?', '[', ']', '(', ')', '{', '}', '^', '$', '|', '\\' -> {
-                            tokens.add(RegexToken.Literal(regex[i + 1].toString()))
-                            i++
-                        }
-                        else -> {
-                            // Other escape sequences treated as literals
-                            tokens.add(RegexToken.Literal(regex[i + 1].toString()))
-                            i++
-                        }
-                    }
+            when (regex[i]) {
+                '(' -> depth++
+                ')' -> if (depth > 0) depth--
+                '|' -> if (depth == 0) {
+                    alternationParts.add(regex.substring(lastSplit, i))
+                    lastSplit = i + 1
                 }
-
-                // Character classes
-                regex[i] == '[' -> {
-                    val end = regex.indexOf(']', i)
-                    if (end > i) {
-                        tokens.add(RegexToken.CharClass(regex.substring(i, end + 1)))
-                        i = end
-                    }
-                }
-
-                // Groups
-                regex[i] == '(' -> {
-                    val groupTokens = parseGroup(regex, i)
-                    if (groupTokens != null) {
-                        tokens.add(groupTokens.first)
-                        i = groupTokens.second
-                    } else {
-                        tokens.add(RegexToken.Literal(regex[i].toString()))
-                    }
-                }
-
-                // Quantifiers (must come after a token)
-                regex[i] == '*' && tokens.isNotEmpty() -> {
-                    tokens.add(RegexToken.Quantifier(0, null))
-                }
-                regex[i] == '+' && tokens.isNotEmpty() -> {
-                    tokens.add(RegexToken.Quantifier(1, null))
-                }
-                regex[i] == '?' && tokens.isNotEmpty() -> {
-                    tokens.add(RegexToken.Quantifier(0, 1))
-                }
-                regex[i] == '{' -> {
-                    val quantifier = parseQuantifier(regex, i)
-                    if (quantifier != null && tokens.isNotEmpty()) {
-                        tokens.add(quantifier.first)
-                        i = quantifier.second
-                    } else {
-                        tokens.add(RegexToken.Literal(regex[i].toString()))
-                    }
-                }
-
-                // Wildcards
-                regex[i] == '.' -> tokens.add(RegexToken.CharClass("."))
-
-                // Literals
-                else -> tokens.add(RegexToken.Literal(regex[i].toString()))
             }
             i++
         }
+        alternationParts.add(regex.substring(lastSplit, regex.length))
+        if (alternationParts.size > 1) {
+            val alternationTokens = alternationParts.map { part ->
+                val partTokens = tokenize(part, true)
+                if (partTokens.size == 1) {
+                    partTokens[0]
+                } else {
+                    RegexToken.Group(partTokens)
+                }
+            }
+            tokens.add(RegexToken.Alternative(alternationTokens))
+            return tokens
+        }
+
+        i = 0
+        while (i < regex.length) {
+            i = parseToken(regex, i, tokens)
+        }
+
         return tokens
+    }
+
+    private fun parseToken(
+        regex: String,
+        i: Int,
+        tokens: MutableList<RegexToken>
+    ): Int {
+        var i1 = i
+        when {
+            // Anchors
+            regex[i1] == '^' -> tokens.add(RegexToken.StartAnchor)
+            regex[i1] == '$' -> tokens.add(RegexToken.EndAnchor)
+
+            // Escape sequences
+            regex[i1] == '\\' && i1 + 1 < regex.length -> {
+                when (regex[i1 + 1]) {
+                    'd' -> {
+                        tokens.add(RegexToken.DigitClass)
+                        i1++
+                    }
+
+                    'w' -> {
+                        tokens.add(RegexToken.WordClass)
+                        i1++
+                    }
+
+                    's' -> {
+                        tokens.add(RegexToken.WhitespaceClass)
+                        i1++
+                    }
+                    // Escaped special characters
+                    '.', '*', '+', '?', '[', ']', '(', ')', '{', '}', '^', '$', '|', '\\' -> {
+                        tokens.add(RegexToken.Literal(regex[i1 + 1].toString()))
+                        i1++
+                    }
+
+
+
+                    else -> {
+                        // Other escape sequences treated as literals
+                        tokens.add(RegexToken.Literal(regex[i1 + 1].toString()))
+                        i1++
+                    }
+                }
+            }
+
+            // Character classes
+            regex[i1] == '[' -> {
+                val end = regex.indexOf(']', i1)
+                if (end > i1) {
+                    tokens.add(RegexToken.CharClass(regex.substring(i1, end + 1)))
+                    i1 = end
+                }
+            }
+
+            // Groups
+            regex[i1] == '(' -> {
+                val groupTokens = parseGroup(regex, i1)
+                if (groupTokens != null) {
+                    tokens.add(groupTokens.first)
+                    i1 = groupTokens.second
+                } else {
+                    tokens.add(RegexToken.Literal(regex[i1].toString()))
+                }
+            }
+
+            // Quantifiers (must come after a token)
+            regex[i1] == '*' && tokens.isNotEmpty() -> {
+                tokens.add(RegexToken.Quantifier(0, null))
+            }
+
+            regex[i1] == '+' && tokens.isNotEmpty() -> {
+                tokens.add(RegexToken.Quantifier(1, null))
+            }
+
+            regex[i1] == '?' && tokens.isNotEmpty() -> {
+                tokens.add(RegexToken.Quantifier(0, 1))
+            }
+
+            regex[i1] == '{' -> {
+                val quantifier = parseQuantifier(regex, i1)
+                if (quantifier != null && tokens.isNotEmpty()) {
+                    tokens.add(quantifier.first)
+                    i1 = quantifier.second
+                } else {
+                    tokens.add(RegexToken.Literal(regex[i1].toString()))
+                }
+            }
+
+            // Wildcards
+            regex[i1] == '.' -> tokens.add(RegexToken.CharClass("."))
+
+            // Literals
+            else -> tokens.add(RegexToken.Literal(regex[i1].toString()))
+        }
+        i1++
+        return i1
     }
 
     private fun parseGroup(regex: String, startIndex: Int): Pair<RegexToken, Int>? {
