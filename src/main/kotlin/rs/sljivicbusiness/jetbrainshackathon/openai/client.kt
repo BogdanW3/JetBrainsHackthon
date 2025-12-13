@@ -8,27 +8,14 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+//import rs.sljivicbusiness.jetbrainshackathon.openai.ChatResponse
+import rs.sljivicbusiness.jetbrainshackathon.openai.model.*
 import java.util.*
+import java.io.Closeable
 
-@Serializable
-data class ChatMessage(val role: String, val content: String)
 
-@Serializable
-data class ChatRequest(
-    val model: String,
-    val messages: List<ChatMessage>
-)
-
-@Serializable
-data class ChatChoice(val message: ChatMessage)
-
-@Serializable
-data class ChatResponse(val choices: List<ChatChoice>)
-
-object OpenAIClient {
-    // Reuse HttpClient for the whole app
+class OpenAIService : Closeable {
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })
@@ -74,7 +61,7 @@ object OpenAIClient {
         }
     }
 
-    fun close() {
+    override fun close() {
         client.close()
     }
 }
