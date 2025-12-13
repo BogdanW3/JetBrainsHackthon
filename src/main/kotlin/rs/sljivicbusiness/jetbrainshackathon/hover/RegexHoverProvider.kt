@@ -13,12 +13,15 @@ class RegexHoverProvider : AbstractDocumentationProvider() {
         val text = element.text ?: return null
         if (!looksLikeRegex(text)) return null
 
-        val tokens = RegexTokenizer.tokenize(text)
+        // Remove surrounding quotes if present
+        val cleanedText = text.trim('"', '\'')
+
+        val tokens = RegexTokenizer.tokenize(cleanedText)
         val explanation = RegexExplainer.explain(tokens)
 
         return explanation.joinToString("<br>")
     }
 
     private fun looksLikeRegex(text: String): Boolean =
-        text.contains("\\d") || text.contains("[") || text.startsWith("^")
+        text.contains("\\d") || text.contains("[") || text.startsWith("^") || text.contains(".*")
 }
