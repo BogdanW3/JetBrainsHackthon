@@ -1,12 +1,12 @@
-package rs.sljivicbusiness.reggin.action
+package rs.sljivicbusiness.regins.action
 
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.vcs.log.VcsLogDataKeys
 import kotlinx.coroutines.runBlocking
-import rs.sljivicbusiness.reggin.openai.OpenAIService
-import rs.sljivicbusiness.reggin.ui.ExplanationPopup
+import rs.sljivicbusiness.regins.openai.OpenAIService
+import rs.sljivicbusiness.regins.ui.ExplanationPopup
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -165,9 +165,8 @@ class ExplainDiffAction : AnAction() {
         buildString {
             appendLine(
                 "You are a helpful assistant. Explain the following git diff in plain text, " +
-                        "focusing on intent, high-level summary, and potential risks only if they are very likely. " +
-                        "Be extremely concise (<= 200 words)."
-            )
+                        "focusing on intent, high-level summary, and potential risks only if they are very likely. " )
+            appendLine("IMPORTANT: Be extremely concise (<= 150 words).")
             appendLine(
                 "IMPORTANT: do not analyze line-by-line, do not repeat the diff, " +
                         "and avoid mentioning binary file changes."

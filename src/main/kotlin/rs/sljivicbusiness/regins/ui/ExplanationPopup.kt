@@ -1,4 +1,4 @@
-package rs.sljivicbusiness.reggin.ui
+package rs.sljivicbusiness.regins.ui
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorFontType

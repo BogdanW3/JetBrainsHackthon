@@ -1,4 +1,4 @@
-package rs.sljivicbusiness.reggin.openai.models
+package rs.sljivicbusiness.regins.openai.models
 
 import kotlinx.serialization.Serializable
 

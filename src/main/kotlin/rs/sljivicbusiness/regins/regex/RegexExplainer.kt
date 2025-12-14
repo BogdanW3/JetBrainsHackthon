@@ -1,4 +1,4 @@
-package rs.sljivicbusiness.reggin.regex
+package rs.sljivicbusiness.regins.regex
 
 object RegexExplainer {
 

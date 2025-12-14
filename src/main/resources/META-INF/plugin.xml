@@ -1,7 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
   <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-  <id>rs.sljivicbusiness.reggin</id>
+  <id>rs.sljivicbusiness.regins</id>
 
   <!-- Public plugin name -->
   <name>Regex &amp; Git Inspector</name>
@@ -19,22 +19,22 @@
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
   <extensions defaultExtensionNs="com.intellij">
       <documentationProvider
-              implementation="rs.sljivicbusiness.reggin.hover.RegexHoverProvider"/>
+              implementation="rs.sljivicbusiness.regins.hover.RegexHoverProvider"/>
       <applicationConfigurable
               parentId="tools"
-              instance="rs.sljivicbusiness.reggin.settings.OpenAISettingsConfigurable"
-              id="rs.sljivicbusiness.reggin.settings.OpenAISettingsConfigurable"
+              instance="rs.sljivicbusiness.regins.settings.OpenAISettingsConfigurable"
+              id="rs.sljivicbusiness.regins.settings.OpenAISettingsConfigurable"
               bundle="messages.PluginBundle"
               key="settings.openai.displayName"/>
   </extensions>
   <actions>
     <action id="ExplainRegex"
-            class="rs.sljivicbusiness.reggin.action.ExplainRegexAction">
+            class="rs.sljivicbusiness.regins.action.ExplainRegexAction">
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
     </action>
 
     <action id="ExplainDiff"
-            class="rs.sljivicbusiness.reggin.action.ExplainDiffAction">
+            class="rs.sljivicbusiness.regins.action.ExplainDiffAction">
         <add-to-group group-id="Vcs.Log.ContextMenu" anchor="last"/>
     </action>
 

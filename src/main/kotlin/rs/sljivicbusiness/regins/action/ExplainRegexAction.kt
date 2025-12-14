@@ -1,12 +1,12 @@
-package rs.sljivicbusiness.reggin.action
+package rs.sljivicbusiness.regins.action
 
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import kotlinx.coroutines.runBlocking
-import rs.sljivicbusiness.reggin.openai.OpenAIService
-import rs.sljivicbusiness.reggin.regex.*
-import rs.sljivicbusiness.reggin.ui.ExplanationPopup
+import rs.sljivicbusiness.regins.openai.OpenAIService
+import rs.sljivicbusiness.regins.regex.*
+import rs.sljivicbusiness.regins.ui.ExplanationPopup
 
 class ExplainRegexAction : AnAction() {
 

@@ -1,9 +1,9 @@
-package rs.sljivicbusiness.reggin.hover
+package rs.sljivicbusiness.regins.hover
 
-import rs.sljivicbusiness.reggin.regex.*
+import rs.sljivicbusiness.regins.regex.*
 import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.psi.PsiElement
-import rs.sljivicbusiness.reggin.regex.RegexUtils
+import rs.sljivicbusiness.regins.regex.RegexUtils
 
 class RegexHoverProvider : AbstractDocumentationProvider() {
 

@@ -1,4 +1,4 @@
-package rs.sljivicbusiness.reggin.settings
+package rs.sljivicbusiness.regins.settings
 
 import com.intellij.openapi.components.*
 import com.intellij.util.xmlb.XmlSerializerUtil

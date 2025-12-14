@@ -1,4 +1,4 @@
-package rs.sljivicbusiness.reggin.regex
+package rs.sljivicbusiness.regins.regex
 
 sealed class RegexToken {
     data class Literal(val value: String) : RegexToken()
