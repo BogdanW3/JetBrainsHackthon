@@ -10,8 +10,8 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 @Service(Service.Level.APP)
 class OpenAISettings : PersistentStateComponent<OpenAISettings> {
 
-    var apiKey: String = ""
-    var organizationId: String = ""
+    var apiKey: String? = null
+    var organizationId: String? = null
 
     override fun getState(): OpenAISettings = this
 
@@ -20,7 +20,6 @@ class OpenAISettings : PersistentStateComponent<OpenAISettings> {
     }
 
     companion object {
-        fun getInstance(): OpenAISettings = service()
+        fun getInstance(): OpenAISettings = service<OpenAISettings>()
     }
 }
-
