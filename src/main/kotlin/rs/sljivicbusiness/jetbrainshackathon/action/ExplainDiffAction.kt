@@ -27,11 +27,18 @@ class ExplainDiffAction : AnAction() {
         val project = e.project ?: return
         val editor = e.getData(CommonDataKeys.EDITOR)
 
-        val commits = e.getData(VcsLogDataKeys.VCS_LOG_COMMIT_SELECTION)
-        if (commits == null || commits.size != 2) return
-
-        val commitA = commits.commits[0].hash.asString()
-        val commitB = commits.commits[1].hash.asString()
+        val commitSelection = e.getData(VcsLogDataKeys.VCS_LOG_COMMIT_SELECTION) ?: return
+        val commits = commitSelection.commits
+        if (commits.size < 2) {
+            Messages.showInfoMessage(
+                project,
+                "Please select two commits to explain the diff between them.",
+                "Explain Diff"
+            )
+            return
+        }
+        val commitA = commits[0].hash.asString()
+        val commitB = commits[1].hash.asString()
         val baseDir = project.basePath?.let(::File) ?: File(".")
 
         showInitialUi(project, editor, commitA, commitB)
