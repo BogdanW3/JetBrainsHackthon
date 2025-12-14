@@ -52,10 +52,6 @@ class ExplainDiffAction : AnAction() {
         )
     }
 
-    // ------------------------------------------------
-    // UI
-    // ------------------------------------------------
-
     private fun showInitialUi(
         project: com.intellij.openapi.project.Project,
         editor: com.intellij.openapi.editor.Editor?,
@@ -80,10 +76,6 @@ class ExplainDiffAction : AnAction() {
             )
         }
     }
-
-    // ------------------------------------------------
-    // Background work
-    // ------------------------------------------------
 
     private fun fetchDiffExplanation(
         project: com.intellij.openapi.project.Project,
@@ -139,10 +131,6 @@ class ExplainDiffAction : AnAction() {
         }
     }
 
-    // ------------------------------------------------
-    // Git
-    // ------------------------------------------------
-
     private fun runGitDiff(
         workingDir: File,
         commitA: String,
@@ -164,10 +152,6 @@ class ExplainDiffAction : AnAction() {
         } catch (e: Exception) {
             "Error running git diff: ${e.message}"
         }
-
-    // ------------------------------------------------
-    // Helpers
-    // ------------------------------------------------
 
     private fun truncateDiff(diff: String, maxChars: Int): String =
         if (diff.length <= maxChars) diff

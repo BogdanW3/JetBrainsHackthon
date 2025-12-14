@@ -26,10 +26,6 @@ object ExplanationPopup {
         createAndShowPopup(editor, html)
     }
 
-    // ------------------------------------------------
-    // Creation
-    // ------------------------------------------------
-
     private fun createAndShowPopup(editor: Editor, html: String) {
         val editorPane = JEditorPane("text/html", html).apply {
             isEditable = false
@@ -50,10 +46,6 @@ object ExplanationPopup {
                 popup.showInBestPositionFor(editor)
             }
     }
-
-    // ------------------------------------------------
-    // Update
-    // ------------------------------------------------
 
     private fun updatePopup(
         popup: JBPopup,
@@ -77,10 +69,6 @@ object ExplanationPopup {
 
         return scrollPane?.viewport?.view as? JEditorPane
     }
-
-    // ------------------------------------------------
-    // Layout
-    // ------------------------------------------------
 
     private fun adjustPopupSizeAndPosition(
         popup: AbstractPopup,
@@ -110,10 +98,6 @@ object ExplanationPopup {
         popup.setLocation(adjustedPoint)
         popup.size = newSize
     }
-
-    // ------------------------------------------------
-    // HTML
-    // ------------------------------------------------
 
     private fun buildHtml(editor: Editor, lines: List<String>): String {
         val content = lines.joinToString("<br>")
