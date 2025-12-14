@@ -1,4 +1,4 @@
-package rs.sljivicbusiness.jetbrainshackathon.openai
+package rs.sljivicbusiness.reggin.openai
 
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -9,10 +9,10 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import rs.sljivicbusiness.jetbrainshackathon.openai.models.ChatMessage
-import rs.sljivicbusiness.jetbrainshackathon.openai.models.ChatRequest
-import rs.sljivicbusiness.jetbrainshackathon.openai.models.ChatResponse
-import rs.sljivicbusiness.jetbrainshackathon.settings.OpenAISettings
+import rs.sljivicbusiness.reggin.openai.models.ChatMessage
+import rs.sljivicbusiness.reggin.openai.models.ChatRequest
+import rs.sljivicbusiness.reggin.openai.models.ChatResponse
+import rs.sljivicbusiness.reggin.settings.OpenAISettings
 import java.io.Closeable
 import java.util.UUID
 

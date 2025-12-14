@@ -1,4 +1,4 @@
-package rs.sljivicbusiness.jetbrainshackathon.settings
+package rs.sljivicbusiness.reggin.settings
 
 import com.intellij.openapi.options.Configurable
 import com.intellij.ui.components.JBPasswordField

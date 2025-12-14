@@ -1,12 +1,12 @@
-package rs.sljivicbusiness.jetbrainshackathon.action
+package rs.sljivicbusiness.reggin.action
 
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.vcs.log.VcsLogDataKeys
 import kotlinx.coroutines.runBlocking
-import rs.sljivicbusiness.jetbrainshackathon.openai.OpenAIService
-import rs.sljivicbusiness.jetbrainshackathon.ui.ExplanationPopup
+import rs.sljivicbusiness.reggin.openai.OpenAIService
+import rs.sljivicbusiness.reggin.ui.ExplanationPopup
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader

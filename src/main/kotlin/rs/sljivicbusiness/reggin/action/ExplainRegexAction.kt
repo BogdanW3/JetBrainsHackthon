@@ -1,12 +1,12 @@
-package rs.sljivicbusiness.jetbrainshackathon.action
+package rs.sljivicbusiness.reggin.action
 
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import kotlinx.coroutines.runBlocking
-import rs.sljivicbusiness.jetbrainshackathon.openai.OpenAIService
-import rs.sljivicbusiness.jetbrainshackathon.regex.*
-import rs.sljivicbusiness.jetbrainshackathon.ui.ExplanationPopup
+import rs.sljivicbusiness.reggin.openai.OpenAIService
+import rs.sljivicbusiness.reggin.regex.*
+import rs.sljivicbusiness.reggin.ui.ExplanationPopup
 
 class ExplainRegexAction : AnAction() {
 

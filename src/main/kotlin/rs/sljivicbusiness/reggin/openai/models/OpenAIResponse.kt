@@ -1,4 +1,4 @@
-package rs.sljivicbusiness.jetbrainshackathon.openai.models
+package rs.sljivicbusiness.reggin.openai.models
 
 
 import kotlinx.serialization.Serializable

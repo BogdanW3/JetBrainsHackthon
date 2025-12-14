@@ -1,4 +1,4 @@
-package rs.sljivicbusiness.jetbrainshackathon.regex
+package rs.sljivicbusiness.reggin.regex
 
 object RegexUtils {
 

@@ -1,11 +1,11 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
   <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-  <id>rs.sljivicbusiness.JetBrainsHackathon</id>
+  <id>rs.sljivicbusiness.reggin</id>
 
   <!-- Public plugin name should be written in Title Case.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-  <name>JetBrainsHackathon</name>
+  <name>RegGIn</name>
 
   <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
   <vendor email="dev@sljivicbusiness.rs" url="https://sljivicbusiness.rs">Sljivic Business</vendor>
@@ -14,7 +14,8 @@
        Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
   <description><![CDATA[
-    Provides inline explanations for regular expressions and an editor action to explain selected regexes.
+    Provides inline explanations for regular expressions and an editor action to explain selected regexes, as well
+    as git diffs, using OpenAI's language model.
   ]]></description>
 
   <!-- Product and plugin compatibility requirements.
@@ -25,23 +26,23 @@
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
   <extensions defaultExtensionNs="com.intellij">
       <documentationProvider
-              implementation="rs.sljivicbusiness.jetbrainshackathon.hover.RegexHoverProvider"/>
+              implementation="rs.sljivicbusiness.reggin.hover.RegexHoverProvider"/>
       <applicationConfigurable
               parentId="tools"
-              instance="rs.sljivicbusiness.jetbrainshackathon.settings.OpenAISettingsConfigurable"
-              id="rs.sljivicbusiness.jetbrainshackathon.settings.OpenAISettingsConfigurable"
+              instance="rs.sljivicbusiness.reggin.settings.OpenAISettingsConfigurable"
+              id="rs.sljivicbusiness.reggin.settings.OpenAISettingsConfigurable"
               displayName="OpenAI API Settings"/>
   </extensions>
   <actions>
     <action id="ExplainRegex"
-            class="rs.sljivicbusiness.jetbrainshackathon.action.ExplainRegexAction"
+            class="rs.sljivicbusiness.reggin.action.ExplainRegexAction"
             text="Explain Regex"
             description="Explain selected regular expression">
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
     </action>
 
     <action id="ExplainDiff"
-            class="rs.sljivicbusiness.jetbrainshackathon.action.ExplainDiffAction"
+            class="rs.sljivicbusiness.reggin.action.ExplainDiffAction"
             text="Explain Diff"
             description="Explain git diff between two commits">
         <add-to-group group-id="Vcs.Log.ContextMenu" anchor="last"/>

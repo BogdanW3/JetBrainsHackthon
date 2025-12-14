@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "JetBrainsHackathon"
+rootProject.name = "RegGIn"
