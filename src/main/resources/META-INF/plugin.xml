@@ -3,23 +3,16 @@
   <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
   <id>rs.sljivicbusiness.reggin</id>
 
-  <!-- Public plugin name should be written in Title Case.
-       Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-  <name>RegGIn</name>
+  <!-- Public plugin name -->
+  <name>Regex &amp; Git Inspector</name>
 
   <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
   <vendor email="dev@sljivicbusiness.rs" url="https://sljivicbusiness.rs">Sljivic Business</vendor>
 
-  <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
-       Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
-       Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-  <description><![CDATA[
-    Provides inline explanations for regular expressions and an editor action to explain selected regexes, as well
-    as git diffs, using OpenAI's language model.
-  ]]></description>
+  <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager. Must be >= 40 chars. -->
+  <description>Provides inline explanations for regular expressions and an editor action to explain selected regexes, and a git diff explanation action, powered by OpenAI.</description>
 
-  <!-- Product and plugin compatibility requirements.
-       Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+  <!-- Product and plugin compatibility requirements. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
   <depends>com.intellij.modules.platform</depends>
 
   <!-- Extension points defined by the plugin.
@@ -31,22 +24,20 @@
               parentId="tools"
               instance="rs.sljivicbusiness.reggin.settings.OpenAISettingsConfigurable"
               id="rs.sljivicbusiness.reggin.settings.OpenAISettingsConfigurable"
-              displayName="OpenAI API Settings"/>
+              bundle="messages.PluginBundle"
+              key="settings.openai.displayName"/>
   </extensions>
   <actions>
     <action id="ExplainRegex"
-            class="rs.sljivicbusiness.reggin.action.ExplainRegexAction"
-            text="Explain Regex"
-            description="Explain selected regular expression">
+            class="rs.sljivicbusiness.reggin.action.ExplainRegexAction">
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
     </action>
 
     <action id="ExplainDiff"
-            class="rs.sljivicbusiness.reggin.action.ExplainDiffAction"
-            text="Explain Diff"
-            description="Explain git diff between two commits">
+            class="rs.sljivicbusiness.reggin.action.ExplainDiffAction">
         <add-to-group group-id="Vcs.Log.ContextMenu" anchor="last"/>
     </action>
 
   </actions>
+  <resource-bundle>messages.PluginBundle</resource-bundle>
 </idea-plugin>
