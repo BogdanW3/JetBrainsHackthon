@@ -8,24 +8,30 @@ import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.ui.popup.AbstractPopup
 import java.awt.Point
-import javax.swing.*
-
+import javax.swing.JEditorPane
+import javax.swing.JScrollPane
 
 object ExplanationPopup {
 
     private var popup: JBPopup? = null
 
     fun show(editor: Editor, lines: List<String>) {
+        val html = buildHtml(editor, lines)
+
         popup?.let {
-            updatePopup(it, editor, lines)
+            updatePopup(it, editor, html)
             return
         }
 
-        createAndShowPopup(editor, lines)
+        createAndShowPopup(editor, html)
     }
 
-    private fun createAndShowPopup(editor: Editor, lines: List<String>) {
-        val editorPane = JEditorPane("text/html", lines.joinToString("<br>")).apply {
+    // ------------------------------------------------
+    // Creation
+    // ------------------------------------------------
+
+    private fun createAndShowPopup(editor: Editor, html: String) {
+        val editorPane = JEditorPane("text/html", html).apply {
             isEditable = false
             font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
         }
@@ -45,22 +51,37 @@ object ExplanationPopup {
             }
     }
 
-    private fun updatePopup(popup: JBPopup, editor: Editor, lines: List<String>) {
+    // ------------------------------------------------
+    // Update
+    // ------------------------------------------------
+
+    private fun updatePopup(
+        popup: JBPopup,
+        editor: Editor,
+        html: String
+    ) {
         val abstractPopup = popup as? AbstractPopup ?: return
         val content = abstractPopup.content as? AbstractPopup.MyContentPanel ?: return
 
         val editorPane = extractEditorPane(content) ?: return
-        editorPane.text = lines.joinToString("<br>")
+        editorPane.text = html
 
         adjustPopupSizeAndPosition(abstractPopup, content, editor)
     }
 
-    private fun extractEditorPane(content: AbstractPopup.MyContentPanel): JEditorPane? {
+    private fun extractEditorPane(
+        content: AbstractPopup.MyContentPanel
+    ): JEditorPane? {
         val scrollPane = content.components
             .firstOrNull { it is JScrollPane } as? JScrollPane
 
         return scrollPane?.viewport?.view as? JEditorPane
     }
+
+    // ------------------------------------------------
+    // Layout
+    // ------------------------------------------------
+
     private fun adjustPopupSizeAndPosition(
         popup: AbstractPopup,
         content: AbstractPopup.MyContentPanel,
@@ -88,5 +109,29 @@ object ExplanationPopup {
 
         popup.setLocation(adjustedPoint)
         popup.size = newSize
+    }
+
+    // ------------------------------------------------
+    // HTML
+    // ------------------------------------------------
+
+    private fun buildHtml(editor: Editor, lines: List<String>): String {
+        val content = lines.joinToString("<br>")
+        val font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
+        val fg = editor.colorsScheme.defaultForeground
+        val bg = editor.colorsScheme.defaultBackground
+
+        return """
+            <html>
+              <body style="
+                font-family: ${font.family};
+                font-size: ${font.size - 2}px;
+                color: rgb(${fg.red}, ${fg.green}, ${fg.blue});
+                background-color: rgb(${bg.red}, ${bg.green}, ${bg.blue});
+              ">
+                $content
+              </body>
+            </html>
+        """.trimIndent()
     }
 }
