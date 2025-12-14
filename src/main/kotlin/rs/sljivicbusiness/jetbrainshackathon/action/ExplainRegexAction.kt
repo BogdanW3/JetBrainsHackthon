@@ -31,10 +31,6 @@ class ExplainRegexAction : AnAction() {
         fetchAiExplanation(editor, regexText, explanation)
     }
 
-    // ------------------------------------------------
-    // Regex extraction
-    // ------------------------------------------------
-
     private fun extractRegex(editor: Editor): String? {
         editor.selectionModel.selectedText
             ?.takeIf { it.isNotBlank() }
@@ -65,10 +61,6 @@ class ExplainRegexAction : AnAction() {
             }
     }
 
-    // ------------------------------------------------
-    // UI
-    // ------------------------------------------------
-
     private fun showInitialPopup(
         editor: Editor,
         regex: String,
@@ -85,10 +77,6 @@ class ExplainRegexAction : AnAction() {
 
         ExplanationPopup.show(editor, lines, false)
     }
-
-    // ------------------------------------------------
-    // OpenAI
-    // ------------------------------------------------
 
     private fun fetchAiExplanation(
         editor: Editor,
@@ -123,10 +111,6 @@ class ExplainRegexAction : AnAction() {
             }
         }
     }
-
-    // ------------------------------------------------
-    // Prompt
-    // ------------------------------------------------
 
     private fun buildPrompt(
         regex: String,
