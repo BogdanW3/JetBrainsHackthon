@@ -18,9 +18,24 @@ object ExplanationPopup {
 
     fun show(editor: Editor, lines: List<String>) {
 
+        val content = lines.joinToString("<br>")
+        val html = """
+                <html>
+                <body style="font-family: ${editor.colorsScheme.getFont(EditorFontType.PLAIN).family}; 
+                             text-size: ${editor.colorsScheme.getFont(EditorFontType.PLAIN).size - 2}px; 
+                             color: rgb(${editor.colorsScheme.defaultForeground.red}, 
+                                         ${editor.colorsScheme.defaultForeground.green}, 
+                                         ${editor.colorsScheme.defaultForeground.blue}); 
+                             background-color: rgb(${editor.colorsScheme.defaultBackground.red}, 
+                                                   ${editor.colorsScheme.defaultBackground.green}, 
+                                                   ${editor.colorsScheme.defaultBackground.blue});">
+                $content
+                </body>
+                </html>
+            """.trimIndent()
 
         if (popup == null) {
-            val editorPane = JEditorPane("text/html", lines.joinToString("<br>"))
+            val editorPane = JEditorPane("text/html", html)
             editorPane.isEditable = false
             editorPane.font = editor.colorsScheme.getFont(EditorFontType.PLAIN)
 
@@ -45,7 +60,7 @@ object ExplanationPopup {
             if (content is AbstractPopup.MyContentPanel) {
                 val scrollPane = content.components.firstOrNull { it is JScrollPane } as? JScrollPane
                 val editorPane = scrollPane?.viewport?.view as? JEditorPane
-                editorPane?.text = lines.joinToString("<br>")
+                editorPane?.text = html
 
                 var newSize = content.preferredSize
                 // check that it doesn't go off-screen using the popup's position
