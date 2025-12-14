@@ -17,10 +17,6 @@ object RegexUtils {
                 text.startsWith("^") ||
                 text.endsWith("$")
 
-    // ------------------------------------------------
-    // Helpers
-    // ------------------------------------------------
-
     private fun stripDelimiters(input: String): Pair<String, Boolean> =
         when {
             // Python raw string: r"..." or r'...'

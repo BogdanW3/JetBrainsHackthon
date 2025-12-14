@@ -1,6 +1,5 @@
 package rs.sljivicbusiness.jetbrainshackathon.openai
 
-import com.jetbrains.rd.framework.SocketWire.Companion.timeout
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -10,12 +9,15 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import rs.sljivicbusiness.jetbrainshackathon.openai.models.ChatMessage
+import rs.sljivicbusiness.jetbrainshackathon.openai.models.ChatRequest
+import rs.sljivicbusiness.jetbrainshackathon.openai.models.ChatResponse
 import rs.sljivicbusiness.jetbrainshackathon.settings.OpenAISettings
-import java.util.*
 import java.io.Closeable
-
+import java.util.UUID
 
 class OpenAIService : Closeable {
+
     private val client = HttpClient(CIO) {
         engine {
             requestTimeout = 0
@@ -25,37 +27,40 @@ class OpenAIService : Closeable {
         }
     }
 
-    private fun getApiKey(): String {
-        val settings = OpenAISettings.getInstance()
-        return settings.apiKey.takeIf { it.isNotBlank() }
-            ?: System.getenv("OPENAI_API_KEY")
-            ?: throw IllegalStateException("OpenAI API Key not configured. Please set it in Settings > OpenAI API Settings")
-    }
+    private val settings: OpenAISettings
+        get() = OpenAISettings.getInstance()
 
-    private fun getOrganizationId(): String? {
-        val settings = OpenAISettings.getInstance()
-        return settings.organizationId.takeIf { it.isNotBlank() }
+    private fun getApiKey(): String =
+        settings.apiKey
+            ?.takeIf { it.isNotBlank() }
+            ?: System.getenv("OPENAI_API_KEY")
+            ?: throw IllegalStateException(
+                "OpenAI API Key not configured. Please set it in Settings > OpenAI API Settings"
+            )
+
+    private fun getOrganizationId(): String? =
+        settings.organizationId
+            ?.takeIf { it.isNotBlank() }
             ?: System.getenv("OPENAI_ORG_ID")
-    }
 
     suspend fun askOpenAI(prompt: String): String {
-        val initialPrompt = "You are a helpful assistant that always responds in a friendly way."
         val requestId = UUID.randomUUID().toString()
+        val systemPrompt =
+            "You are a helpful assistant that always responds in a friendly way."
 
-        try {
-            val apiKey = getApiKey()
-            val organizationId = getOrganizationId()
-
+        return try {
             val response: HttpResponse = client.post("https://api.openai.com/v1/chat/completions") {
-                header("Authorization", "Bearer $apiKey")
-                organizationId?.let { header("OpenAI-Organization", it) }
+                header(HttpHeaders.Authorization, "Bearer ${getApiKey()}")
+                getOrganizationId()?.let {
+                    header("OpenAI-Organization", it)
+                }
                 header("X-Client-Request-Id", requestId)
                 contentType(ContentType.Application.Json)
                 setBody(
                     ChatRequest(
                         model = "gpt-4o-mini",
                         messages = listOf(
-                            ChatMessage(role = "system", content = initialPrompt),
+                            ChatMessage(role = "system", content = systemPrompt),
                             ChatMessage(role = "user", content = prompt)
                         )
                     )
@@ -64,16 +69,22 @@ class OpenAIService : Closeable {
 
             if (!response.status.isSuccess()) {
                 val errorBody = response.bodyAsText()
-                println("OpenAI request failed: ${response.status}. x-request-id=$requestId. Body: $errorBody")
-                return "Error: ${response.status}"
+                println(
+                    "OpenAI request failed: ${response.status} " +
+                            "(x-request-id=$requestId). Body: $errorBody"
+                )
+                "Error: ${response.status}"
+            } else {
+                val chatResponse: ChatResponse = response.body()
+                chatResponse.choices
+                    .firstOrNull()
+                    ?.message
+                    ?.content
+                    ?: "No response"
             }
-
-            val chatResponse: ChatResponse = response.body()
-            return chatResponse.choices.firstOrNull()?.message?.content ?: "No response"
-
         } catch (e: Exception) {
             println("Exception during OpenAI request (x-request-id=$requestId): ${e.message}")
-            return "Exception: ${e.message}"
+            "Exception: ${e.message}"
         }
     }
 
