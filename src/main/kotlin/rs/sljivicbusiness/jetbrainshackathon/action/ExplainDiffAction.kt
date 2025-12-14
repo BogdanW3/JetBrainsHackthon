@@ -71,7 +71,7 @@ class ExplainDiffAction : AnAction() {
         )
 
         if (editor != null) {
-            ExplanationPopup.show(editor, lines)
+            ExplanationPopup.show(editor, lines, false)
         } else {
             Messages.showInfoMessage(
                 project,
@@ -115,7 +115,7 @@ class ExplainDiffAction : AnAction() {
 
                 app.invokeLater {
                     if (editor != null) {
-                        ExplanationPopup.show(editor, resultLines)
+                        ExplanationPopup.show(editor, resultLines, true)
                     } else {
                         Messages.showInfoMessage(
                             project,

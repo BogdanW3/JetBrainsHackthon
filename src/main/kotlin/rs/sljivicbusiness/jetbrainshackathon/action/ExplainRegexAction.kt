@@ -83,7 +83,7 @@ class ExplainRegexAction : AnAction() {
             addAll(explanation)
         }
 
-        ExplanationPopup.show(editor, lines)
+        ExplanationPopup.show(editor, lines, false)
     }
 
     // ------------------------------------------------
@@ -114,7 +114,7 @@ class ExplainRegexAction : AnAction() {
                         add("======= Regex Pattern Illustration =======")
                         addAll(explanation)
                     }
-                    ExplanationPopup.show(editor, updatedLines)
+                    ExplanationPopup.show(editor, updatedLines, true)
                 }
             } catch (e: Exception) {
                 println("Failed to get OpenAI explanation: ${e.message}")

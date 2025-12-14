@@ -15,7 +15,7 @@ object ExplanationPopup {
 
     private var popup: JBPopup? = null
 
-    fun show(editor: Editor, lines: List<String>) {
+    fun show(editor: Editor, lines: List<String>, updateOnly: Boolean) {
         val html = buildHtml(editor, lines)
 
         popup?.let {
@@ -23,7 +23,9 @@ object ExplanationPopup {
             return
         }
 
-        createAndShowPopup(editor, html)
+        if (!updateOnly) {
+            createAndShowPopup(editor, html)
+        }
     }
 
     // ------------------------------------------------
