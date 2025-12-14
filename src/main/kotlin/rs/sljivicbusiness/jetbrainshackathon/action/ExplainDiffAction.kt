@@ -1,13 +1,9 @@
 package rs.sljivicbusiness.jetbrainshackathon.action
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.vcs.log.VcsLogDataKeys
-import com.intellij.vcs.log.ui.table.size
 import kotlinx.coroutines.runBlocking
 import rs.sljivicbusiness.jetbrainshackathon.openai.OpenAIService
 import rs.sljivicbusiness.jetbrainshackathon.ui.ExplanationPopup
@@ -15,37 +11,51 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-
 class ExplainDiffAction : AnAction() {
 
-    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT
+    override fun getActionUpdateThread(): ActionUpdateThread =
+        ActionUpdateThread.EDT
 
     override fun update(e: AnActionEvent) {
-        val presentation = e.presentation
-        presentation.text = "Explain Diff"
-        // enable when a project is open
-        presentation.isEnabledAndVisible = e.project != null
+        e.presentation.apply {
+            text = "Explain Diff"
+            isEnabledAndVisible = e.project != null
+        }
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         val editor = e.getData(CommonDataKeys.EDITOR)
 
-        var commits = e.getData(VcsLogDataKeys.VCS_LOG_COMMIT_SELECTION)
+        val commits = e.getData(VcsLogDataKeys.VCS_LOG_COMMIT_SELECTION)
+        if (commits == null || commits.size != 2) return
 
-        if (commits == null || commits.size != 2) {
-            return
-        }
+        val commitA = commits.commits[0].hash.asString()
+        val commitB = commits.commits[1].hash.asString()
+        val baseDir = project.basePath?.let(::File) ?: File(".")
 
+        showInitialUi(project, editor, commitA, commitB)
 
-        // get the two commits from the Vcs selection
-        val commitA = (commits.commits[0].hash).asString()
-        val commitB = (commits.commits[1].hash).asString()
+        fetchDiffExplanation(
+            project = project,
+            editor = editor,
+            baseDir = baseDir,
+            commitA = commitA,
+            commitB = commitB
+        )
+    }
 
-        val baseDir = project.basePath?.let { File(it) } ?: File(".")
+    // ------------------------------------------------
+    // UI
+    // ------------------------------------------------
 
-        // Show initial popup while fetching
-        val initialLines = listOf(
+    private fun showInitialUi(
+        project: com.intellij.openapi.project.Project,
+        editor: com.intellij.openapi.editor.Editor?,
+        commitA: String,
+        commitB: String
+    ) {
+        val lines = listOf(
             "Diff: $commitA -> $commitB",
             "========= AI-Powered Explanation =========",
             "Fetching detailed explanation from OpenAI...",
@@ -54,47 +64,67 @@ class ExplainDiffAction : AnAction() {
         )
 
         if (editor != null) {
-            ExplanationPopup.show(editor, initialLines)
+            ExplanationPopup.show(editor, lines)
         } else {
-            Messages.showInfoMessage(project, "Requesting explanation for diff: $commitA -> $commitB", "Explain Diff")
+            Messages.showInfoMessage(
+                project,
+                "Requesting explanation for diff: $commitA -> $commitB",
+                "Explain Diff"
+            )
         }
+    }
 
-        ApplicationManager.getApplication().executeOnPooledThread {
+    // ------------------------------------------------
+    // Background work
+    // ------------------------------------------------
+
+    private fun fetchDiffExplanation(
+        project: com.intellij.openapi.project.Project,
+        editor: com.intellij.openapi.editor.Editor?,
+        baseDir: File,
+        commitA: String,
+        commitB: String
+    ) {
+        val app = ApplicationManager.getApplication()
+
+        app.executeOnPooledThread {
             val diffText = runGitDiff(baseDir, commitA.trim(), commitB.trim())
-            val truncated = truncateDiff(diffText, 60_000) // keep prompt reasonably sized
-
-            val prompt = buildString {
-                appendLine("You are a helpful assistant. Explain the following git diff in plain text, focusing on intent, high level summary, and potential risks (only if the risks are very likely). Keep it very concise (<= 200 words). Do not echo the entire diff back and use the least words possible to illustrate the intention of the diff.")
-                appendLine("IMPORTANT: be as short as possible, do not analyze changes line-by-line nor elaborate on binary file changes. Focus on summarizing the intent of the changes.")
-                appendLine()
-                appendLine("Diff between $commitA and $commitB:")
-                appendLine()
-                appendLine(truncated)
-            }
+            val truncatedDiff = truncateDiff(diffText, MAX_DIFF_CHARS)
+            val prompt = buildPrompt(commitA, commitB, truncatedDiff)
 
             val openAIService = OpenAIService()
             try {
-                val aiExplanation = runBlocking { openAIService.askOpenAI(prompt) }
-                val fullLines = buildList {
+                val aiExplanation = runBlocking {
+                    openAIService.askOpenAI(prompt)
+                }
+
+                val resultLines = buildList {
                     add("Diff: $commitA -> $commitB")
                     add("========= AI-Powered Explanation =========")
                     add(aiExplanation)
                     add("")
-                    add("(Diff truncated to ${truncated.length} chars)")
+                    add("(Diff truncated to ${truncatedDiff.length} chars)")
                 }
 
-                ApplicationManager.getApplication().invokeLater {
+                app.invokeLater {
                     if (editor != null) {
-                        ExplanationPopup.show(editor, fullLines)
+                        ExplanationPopup.show(editor, resultLines)
                     } else {
-                        // No editor to attach popup; show message dialog
-                        Messages.showInfoMessage(project, fullLines.joinToString("\n"), "Explain Diff Result")
+                        Messages.showInfoMessage(
+                            project,
+                            resultLines.joinToString("\n"),
+                            "Explain Diff Result"
+                        )
                     }
                 }
-            } catch (ex: Exception) {
-                println("Failed to get OpenAI explanation: ${ex.message}")
-                ApplicationManager.getApplication().invokeLater {
-                    Messages.showErrorDialog(project, "Failed to get explanation: ${ex.message}", "Explain Diff Error")
+            } catch (e: Exception) {
+                println("Failed to get OpenAI explanation: ${e.message}")
+                app.invokeLater {
+                    Messages.showErrorDialog(
+                        project,
+                        "Failed to get explanation: ${e.message}",
+                        "Explain Diff Error"
+                    )
                 }
             } finally {
                 openAIService.close()
@@ -102,28 +132,62 @@ class ExplainDiffAction : AnAction() {
         }
     }
 
-    private fun runGitDiff(workingDir: File, a: String, b: String): String {
-        return try {
-            val pb = ProcessBuilder("git", "diff", a, b)
-            pb.directory(workingDir)
-            pb.redirectErrorStream(true)
-            val process = pb.start()
-            val reader = BufferedReader(InputStreamReader(process.inputStream))
-            val output = StringBuilder()
-            var line: String? = reader.readLine()
-            while (line != null) {
-                output.append(line).append('\n')
-                line = reader.readLine()
+    // ------------------------------------------------
+    // Git
+    // ------------------------------------------------
+
+    private fun runGitDiff(
+        workingDir: File,
+        commitA: String,
+        commitB: String
+    ): String =
+        try {
+            val process = ProcessBuilder("git", "diff", commitA, commitB)
+                .directory(workingDir)
+                .redirectErrorStream(true)
+                .start()
+
+            BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                buildString {
+                    reader.forEachLine { appendLine(it) }
+                }
+            }.also {
+                process.waitFor()
             }
-            process.waitFor()
-            output.toString()
         } catch (e: Exception) {
             "Error running git diff: ${e.message}"
         }
-    }
 
-    private fun truncateDiff(diff: String, maxChars: Int): String {
-        if (diff.length <= maxChars) return diff
-        return diff.substring(0, maxChars) + "\n\n...[truncated]..."
+    // ------------------------------------------------
+    // Helpers
+    // ------------------------------------------------
+
+    private fun truncateDiff(diff: String, maxChars: Int): String =
+        if (diff.length <= maxChars) diff
+        else diff.substring(0, maxChars) + "\n\n...[truncated]..."
+
+    private fun buildPrompt(
+        commitA: String,
+        commitB: String,
+        diff: String
+    ): String =
+        buildString {
+            appendLine(
+                "You are a helpful assistant. Explain the following git diff in plain text, " +
+                        "focusing on intent, high-level summary, and potential risks only if they are very likely. " +
+                        "Be extremely concise (<= 200 words)."
+            )
+            appendLine(
+                "IMPORTANT: do not analyze line-by-line, do not repeat the diff, " +
+                        "and avoid mentioning binary file changes."
+            )
+            appendLine()
+            appendLine("Diff between $commitA and $commitB:")
+            appendLine()
+            appendLine(diff)
+        }
+
+    companion object {
+        private const val MAX_DIFF_CHARS = 60_000
     }
 }
