@@ -12,13 +12,13 @@ class OpenAISettingsConfigurable : Configurable {
     private val apiKeyField = JBPasswordField()
     private val organizationIdField = JBTextField()
 
+    private val settings: OpenAISettings
+        get() = OpenAISettings.getInstance()
+
     override fun getDisplayName(): String = "OpenAI API Settings"
 
     override fun createComponent(): JComponent {
-        val settings = OpenAISettings.getInstance()
-
-        apiKeyField.text = settings.apiKey
-        organizationIdField.text = settings.organizationId
+        reset()
 
         return FormBuilder.createFormBuilder()
             .addLabeledComponent("API Key:", apiKeyField, 1, false)
@@ -27,22 +27,17 @@ class OpenAISettingsConfigurable : Configurable {
             .panel
     }
 
-    override fun isModified(): Boolean {
-        val settings = OpenAISettings.getInstance()
-        return String(apiKeyField.password) != settings.apiKey ||
-               organizationIdField.text != settings.organizationId
-    }
+    override fun isModified(): Boolean =
+        String(apiKeyField.password) != settings.apiKey ||
+                organizationIdField.text != settings.organizationId
 
     override fun apply() {
-        val settings = OpenAISettings.getInstance()
-        settings.apiKey = String(apiKeyField.password)
-        settings.organizationId = organizationIdField.text
+        settings.apiKey = String(apiKeyField.password).trim()
+        settings.organizationId = organizationIdField.text.trim()
     }
 
     override fun reset() {
-        val settings = OpenAISettings.getInstance()
         apiKeyField.text = settings.apiKey
         organizationIdField.text = settings.organizationId
     }
 }
-
